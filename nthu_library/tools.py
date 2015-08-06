@@ -1,7 +1,9 @@
 import requests
 import random
+import time
 import feedparser
 from bs4 import BeautifulSoup
+from multiprocessing import cpu_count
 from multiprocessing.pool import ThreadPool
 
 
@@ -32,9 +34,21 @@ useragents = [
 ]
 
 
+def timeit(f):
+    def wrap(*args, **kw):
+        s = time.time()
+        result = f(*args, **kw)
+        e = time.time()
+        print('func:%r args:[%r, %r] 耗時: %2.4f 秒' %
+             (f.__name__, args, kw, e - s))
+        return result
+    return wrap
+
+
 def get_page(url, soupful=True, fake_UA=False):
     header = {'User-Agent': random.choice(useragents)} if fake_UA else None
     resp = requests.get(url, headers=header)
+    resp = requests.get(url)
     resp.encoding = 'utf8'
     return BeautifulSoup(resp.text, 'lxml') if soupful else resp
 
@@ -46,7 +60,7 @@ def post_page(url, **kwargs):
 
 
 def get_pages(urls):
-    pool = ThreadPool(8)
+    pool = ThreadPool(cpu_count())
     return pool.map(get_page, urls)
 
 

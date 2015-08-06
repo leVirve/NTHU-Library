@@ -1,10 +1,17 @@
 import os
 import json
 
-from nthu_library.library import NTHULibrary, UserPayload
+from nthu_library import NTHULibrary, UserPayload, timeit
 
 
 __author__ = 'salas'
+
+
+function_doc = """
+    'personal': get_personal_info,
+    'new': get_newest_books,
+    'top': get_top_circulations,
+"""
 
 
 def get_newest_books(lib, **kwargs):
@@ -33,28 +40,34 @@ def get_personal_info(lib):
     }
     return info
 
-if __name__ == '__main__':
 
+def welcome():
     id = os.getenv('NTHU_LIBRARY_ID') or input('ID: ')
     pwd = os.getenv('NTHU_LIBRARY_PWD') or input('PWD: ')
+    print(function_doc)
+    return id, pwd
 
-    user = UserPayload(id, pwd)
-    library = NTHULibrary(user)
 
-    funcs = {
-        'personal': get_personal_info,
-        'new': get_newest_books,
-        'top': get_top_circulations,
-    }
-
-    print('''
-        `personal`: get personal data
-        `new`: get newest books
-        `top`: get top circulated materials
-    ''')
-
-    instr = input('What do you want to do > ').strip()
+@timeit
+def start(instr, library):
     results = funcs[instr](library)
+    dump(results)
 
+
+def dump(results):
     with open('my-library-data.json', 'w', encoding='utf8') as f:
         json.dump(results, f, indent=2, ensure_ascii=False, sort_keys=True)
+
+
+''' functions eval() from doc string '''
+funcs = eval('{%s}' % ''.join(function_doc.split()))
+
+
+if __name__ == '__main__':
+
+    id, pwd = welcome()
+    library = NTHULibrary(UserPayload(id, pwd))
+
+    # instr = input('What do you want to do > ').strip()
+
+    start('top', library)

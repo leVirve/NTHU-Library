@@ -1,5 +1,5 @@
 import re
-import urllib.parse
+from urllib.parse import urljoin
 
 from nthu_library.tools import get_page, post_page, get_pages, get_rss
 
@@ -16,10 +16,14 @@ class NTHULibrary():
     def __init__(self, user):
         self.user = user
         self._session_url = ''
+        self._circulation_links = self._get_circulation_links()
         self.is_login = self._login()
 
+    def __repr__(self):
+        return '%s@library object' % self.user.account
+
     def _login(self):
-        soup = get_page(urllib.parse.urljoin(self.home, '?func=file&file_name=login1'))
+        soup = get_page(urljoin(self.home, '?func=file&file_name=login1'))
         login_url = soup.find('form').attrs.get('action')
 
         resp = post_page(login_url, data=self.user.to_dict())
@@ -64,6 +68,15 @@ class NTHULibrary():
         result['user']['manage'] = manage
         return result
 
+    def _get_circulation_links(self):
+        return [
+            (a, urljoin(self.top_circulations, a.get('href')))
+            for soup in get_pages([
+                NTHULibrary.top_circulations,
+                NTHULibrary.top_circulations_bc2007])
+            for a in soup.find(id='cwrp').find_all('a')
+        ]
+
     def get_newest_books(self, **kwargs):
         """
         fetch recent newest books from official RSS
@@ -83,11 +96,8 @@ class NTHULibrary():
         """
         q_type = 'b_' if type == 'loaned' else 'o_'
         query = [
-            urllib.parse.urljoin(self.top_circulations, a.get('href'))
-            for soup in get_pages([
-                NTHULibrary.top_circulations,
-                NTHULibrary.top_circulations_bc2007])
-            for a in soup.find(id='cwrp').find_all('a')
+            href
+            for a, href in self._circulation_links
             #  filter by year and type
             if not year or (year and str(year)) in a.text
             if a.get('href').startswith(q_type)
@@ -115,7 +125,7 @@ class NTHULibrary():
     def get_info(self):
         if not self.is_login:
             raise NotLoginException
-        soup = get_page(urllib.parse.urljoin(self._session_url, '?func=BOR-INFO'))
+        soup = get_page(urljoin(self._session_url, '?func=BOR-INFO'))
 
         return self._parse(soup)
 
