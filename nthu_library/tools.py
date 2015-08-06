@@ -1,4 +1,5 @@
 import requests
+import grequests
 import random
 import time
 import feedparser
@@ -59,9 +60,26 @@ def post_page(url, **kwargs):
     return resp
 
 
+# @timeit
+def get_pages_event(urls):
+    rs = (grequests.get(u) for u in urls)
+    return grequests.map(rs)
+
+
+def build_soup(resp):
+    return BeautifulSoup(resp.text, 'lxml')
+
+
+def _get_page(url):
+    resp = requests.get(url)
+    resp.encoding = 'utf8'
+    return resp
+
+
+# @timeit
 def get_pages(urls):
     pool = ThreadPool(cpu_count())
-    return pool.map(get_page, urls)
+    return pool.map(_get_page, urls)
 
 
 def get_rss(feed_url, lang=None):

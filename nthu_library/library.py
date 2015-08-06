@@ -2,6 +2,7 @@ import re
 from urllib.parse import urljoin
 
 from nthu_library.tools import get_page, post_page, get_pages, get_rss
+from nthu_library.tools import build_soup
 
 __author__ = 'salas'
 
@@ -71,10 +72,10 @@ class NTHULibrary():
     def _get_circulation_links(self):
         return [
             (a, urljoin(self.top_circulations, a.get('href')))
-            for soup in get_pages([
+            for resp in get_pages([
                 NTHULibrary.top_circulations,
                 NTHULibrary.top_circulations_bc2007])
-            for a in soup.find(id='cwrp').find_all('a')
+            for a in build_soup(resp).find(id='cwrp').find_all('a')
         ]
 
     def get_newest_books(self, **kwargs):
@@ -105,7 +106,7 @@ class NTHULibrary():
 
         results = dict()
         for content in get_pages(query):
-            table = content.find('table', 'listview')
+            table = build_soup(content).find('table', 'listview')
             books = list()
             for row in table.find_all('tr')[1:]:
                 try:
