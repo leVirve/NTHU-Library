@@ -78,14 +78,20 @@ class NTHULibrary():
             for a in build_soup(resp).find(id='cwrp').find_all('a')
         ]
 
-    def get_newest_books(self, **kwargs):
+    def get_newest_books(self, lang=None):
         """
         fetch recent newest books from official RSS
         :param lang: default is `None` to get both languages,
                      'en' for English; or 'zh' for Chinese
         :return: `RSS dict()`
         """
-        return get_rss(NTHULibrary.rss_recent_books, **kwargs)
+        param = {
+            None: '',
+            'en': '?C=LCC',
+            'zh': '?C=CCL',
+        }
+        url = NTHULibrary.rss_recent_books + param[lang]
+        return get_rss(url)
 
     def get_top_circulated_materials(
             self, year=None, type='loaned'):

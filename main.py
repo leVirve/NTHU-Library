@@ -70,4 +70,4 @@ if __name__ == '__main__':
 
     # instr = input('What do you want to do > ').strip()
 
-    start('top', library)
+    start('new', library)

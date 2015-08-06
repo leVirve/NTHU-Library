@@ -82,12 +82,6 @@ def get_pages(urls):
     return pool.map(_get_page, urls)
 
 
-def get_rss(feed_url, lang=None):
-    param = {
-        None: '',
-        'en': '?C=LCC',
-        'zh': '?C=CCL',
-    }
-    url = feed_url + param[lang]
-    feed = feedparser.parse(url)
+def get_rss(feed_url):
+    feed = feedparser.parse(feed_url)
     return feed.get('entries')
