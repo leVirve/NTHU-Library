@@ -49,7 +49,6 @@ def timeit(f):
 def get_page(url, soupful=True, fake_UA=False):
     header = {'User-Agent': random.choice(useragents)} if fake_UA else None
     resp = requests.get(url, headers=header)
-    resp = requests.get(url)
     resp.encoding = 'utf8'
     return BeautifulSoup(resp.text, 'lxml') if soupful else resp
 

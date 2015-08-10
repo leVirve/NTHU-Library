@@ -11,6 +11,7 @@ function_doc = """
     'personal': get_personal_info,
     'new': get_newest_books,
     'top': get_top_circulations,
+    'lost': get_lost,
 """
 
 
@@ -41,6 +42,10 @@ def get_personal_info(lib):
     return info
 
 
+def get_lost(library):
+    return library.get_lost()
+
+
 def welcome():
     id = os.getenv('NTHU_LIBRARY_ID') or input('ID: ')
     pwd = os.getenv('NTHU_LIBRARY_PWD') or input('PWD: ')
@@ -65,9 +70,9 @@ funcs = eval('{%s}' % ''.join(function_doc.split()))
 
 if __name__ == '__main__':
 
-    id, pwd = welcome()
-    library = NTHULibrary(UserPayload(id, pwd))
+    account, pwd = welcome()
+    library = NTHULibrary(UserPayload(account, pwd))
 
-    # instr = input('What do you want to do > ').strip()
+    instr = input('What do you want to do > ').strip()
 
-    start('new', library)
+    start(instr, library)

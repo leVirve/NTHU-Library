@@ -13,6 +13,7 @@ class NTHULibrary():
     top_circulations = 'http://www.lib.nthu.edu.tw/guide/topcirculations/index.htm'
     top_circulations_bc2007 = 'http://www.lib.nthu.edu.tw/guide/topcirculations/bc2007.htm'
     rss_recent_books = 'http://webpac.lib.nthu.edu.tw:8080/nbr/reader/rbn_rss.jsp'
+    lost_found_url = 'http://adage.lib.nthu.edu.tw/find/search_it.php'
 
     def __init__(self, user):
         self.user = user
@@ -77,6 +78,26 @@ class NTHULibrary():
                 NTHULibrary.top_circulations_bc2007])
             for a in build_soup(resp).find(id='cwrp').find_all('a')
         ]
+
+    def get_lost(self,
+                 place='ALL', date_start='2015-02-10',
+                 date_end='2015-08-10', catagory='ALL',
+                 keyword=''):
+        data = {
+            'place': place, 'date_start': date_start,
+            'date_end': date_end, 'catalog': catagory,
+            'keyword': keyword
+        }
+        soup = post_page(NTHULibrary.lost_found_url, data=data)
+        lost_objs = list()
+        for item in build_soup(soup).select('table > tr')[1:]:
+            lost_objs.append({
+                'id': item.select('td:nth-of-type(1)')[0].text,
+                'time': item.select('td:nth-of-type(2)')[0].text,
+                'place': item.select('td:nth-of-type(3)')[0].text,
+                'description': item.select('td:nth-of-type(4)')[0].text,
+            })
+        return lost_objs
 
     def get_newest_books(self, lang=None):
         """
