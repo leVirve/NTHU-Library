@@ -2,12 +2,13 @@ import re
 from urllib.parse import urljoin
 
 from nthu_library.tools import get_page, post_page, get_pages, get_rss
-from nthu_library.tools import build_soup
+from nthu_library.crawler import get_circulation_links, crawl_top_circulations, crawl_lost_objects
+from nthu_library.user import NotLoginException
 
 __author__ = 'salas'
 
 
-class NTHULibrary():
+class NTHULibrary(object):
 
     home = 'http://webpac.lib.nthu.edu.tw/F/'
     top_circulations = 'http://www.lib.nthu.edu.tw/guide/topcirculations/index.htm'
@@ -18,7 +19,7 @@ class NTHULibrary():
     def __init__(self, user):
         self.user = user
         self._session_url = ''
-        self._circulation_links = self._get_circulation_links()
+        self._circulation_links = get_circulation_links(self)
         self.is_login = self._login()
 
     def __repr__(self):
@@ -70,15 +71,6 @@ class NTHULibrary():
         result['user']['manage'] = manage
         return result
 
-    def _get_circulation_links(self):
-        return [
-            (a, urljoin(self.top_circulations, a.get('href')))
-            for resp in get_pages([
-                NTHULibrary.top_circulations,
-                NTHULibrary.top_circulations_bc2007])
-            for a in build_soup(resp).find(id='cwrp').find_all('a')
-        ]
-
     def get_lost(self,
                  place='ALL', date_start='2015-02-10',
                  date_end='2015-08-10', catagory='ALL',
@@ -88,16 +80,7 @@ class NTHULibrary():
             'date_end': date_end, 'catalog': catagory,
             'keyword': keyword
         }
-        soup = post_page(NTHULibrary.lost_found_url, data=data)
-        lost_objs = list()
-        for item in build_soup(soup).select('table > tr')[1:]:
-            lost_objs.append({
-                'id': item.select('td:nth-of-type(1)')[0].text,
-                'time': item.select('td:nth-of-type(2)')[0].text,
-                'place': item.select('td:nth-of-type(3)')[0].text,
-                'description': item.select('td:nth-of-type(4)')[0].text,
-            })
-        return lost_objs
+        return crawl_lost_objects(self, data)
 
     def get_newest_books(self, lang=None):
         """
@@ -130,25 +113,7 @@ class NTHULibrary():
             if not year or (year and str(year)) in a.text
             if a.get('href').startswith(q_type)
         ]
-
-        results = dict()
-        for content in get_pages(query):
-            table = build_soup(content).find('table', 'listview')
-            books = list()
-            for row in table.find_all('tr')[1:]:
-                try:
-                    rk, title, ref, cnt = row.findChildren()
-                except:
-                    # for year 2003, there's no <a> tag
-                    rk, title, cnt = row.findChildren()
-                books.append({
-                    'rank': rk.text,
-                    'bookname': title.text.strip(' /'),
-                    'link': ref.get('href') if ref else None,
-                    'times': cnt.text
-                })
-            results[table.get('summary')] = books
-        return results
+        return crawl_top_circulations(query)
 
     def get_info(self):
         if not self.is_login:
@@ -242,22 +207,3 @@ class NTHULibrary():
             }
             books.append(book)
         return books
-
-
-class NotLoginException(Exception):
-    pass
-
-
-class UserPayload:
-
-    def __init__(self, account, password):
-        self.account = account
-        self.password = password
-
-    def to_dict(self):
-        return {
-            'bor_id': self.account,
-            'bor_verification': self.password,
-            'func': 'login',
-            'ssl_flag': 'Y',
-        }
