@@ -32,34 +32,25 @@ def get_top_circulations(lib, **kwargs):
 
 
 def get_personal_info(lib):
-    result = lib.get_info()
-    info = {
-        'personal': result,
-        '借閱歷史': lib.get_borrow_history(result),
-        '借閱中': lib.get_current_borrow(result),
-        '預約紀錄': lib.get_reserve_history(result),
+    return {
+        'personal': lib.get_info(),
+        '借閱歷史': lib.get_borrow_history(),
+        '借閱中': lib.get_current_borrow(),
+        '預約紀錄': lib.get_reserve_history(),
     }
-    return info
 
 
-def get_lost(library):
-    return library.get_lost()
-
-
-def welcome():
-    id = os.getenv('NTHU_LIBRARY_ID') or input('ID: ')
-    pwd = os.getenv('NTHU_LIBRARY_PWD') or input('PWD: ')
-    print(function_doc)
-    return id, pwd
+def get_lost(lib):
+    """
+    :param lib:
+    :return: <list()> 失物招領物品列表
+    """
+    return lib.get_lost()
 
 
 @timeit
-def start(instr, library):
-    results = funcs[instr](library)
-    dump(results)
-
-
-def dump(results):
+def start(instr, lib):
+    results = funcs[instr](lib)
     with open('my-library-data.json', 'w', encoding='utf8') as f:
         json.dump(results, f, indent=2, ensure_ascii=False, sort_keys=True)
 
@@ -70,8 +61,9 @@ funcs = eval('{%s}' % ''.join(function_doc.split()))
 
 if __name__ == '__main__':
 
-    account, pwd = welcome()
-    library = NTHULibrary(Account(account, pwd))
+    account = os.getenv('NTHU_LIBRARY_ID') or input('ID: ')
+    password = os.getenv('NTHU_LIBRARY_PWD') or input('PWD: ')
+    library = NTHULibrary(Account(account, password))
 
     start('personal', library)
     start('top', library)

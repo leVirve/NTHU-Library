@@ -17,11 +17,11 @@ class NTHULibrary(object):
 
     def get_lost(self,
                  place='ALL', date_start='2015-02-10',
-                 date_end='2015-08-10', catagory='ALL',
+                 date_end='2015-08-10', category='ALL',
                  keyword=''):
         data = {
             'place': place, 'date_start': date_start,
-            'date_end': date_end, 'catalog': catagory,
+            'date_end': date_end, 'catalog': category,
             'keyword': keyword
         }
         return crawl_lost_objects(data)
@@ -48,7 +48,6 @@ class NTHULibrary(object):
         query = [
             href
             for a, href in self._circulation_links
-            #  filter by year and type
             if not year or (year and str(year)) in a.get('text')
             if a.get('href').startswith(q_type)
         ]
