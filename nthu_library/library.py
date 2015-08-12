@@ -1,7 +1,7 @@
 import re
 from urllib.parse import urljoin
 
-from nthu_library.tools import get_page, post_page, get_pages, get_rss
+from nthu_library.tools import get_page, post_page, get_rss
 from nthu_library.crawler import get_circulation_links, crawl_top_circulations, crawl_lost_objects
 from nthu_library.user import NotLoginException
 

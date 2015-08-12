@@ -15,6 +15,7 @@ def get_circulation_links(NTHULibrary):
         for a in build_soup(resp).find(id='cwrp').find_all('a')
     ]
 
+
 def crawl_top_circulations(query):
     results = dict()
     for content in get_pages(query):
