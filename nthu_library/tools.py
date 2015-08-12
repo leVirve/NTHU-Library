@@ -1,12 +1,11 @@
-import requests
-import grequests
 import random
 import time
-import feedparser
-from bs4 import BeautifulSoup
 from multiprocessing import cpu_count
 from multiprocessing.pool import ThreadPool
 
+import requests
+import grequests
+from bs4 import BeautifulSoup
 
 __author__ = 'salas'
 
@@ -79,8 +78,3 @@ def _get_page(url):
 def get_pages(urls):
     pool = ThreadPool(cpu_count())
     return pool.map(_get_page, urls)
-
-
-def get_rss(feed_url):
-    feed = feedparser.parse(feed_url)
-    return feed.get('entries')

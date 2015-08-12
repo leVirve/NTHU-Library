@@ -1,7 +1,7 @@
-from nthu_library.tools import get_rss
-from nthu_library.crawler import get_circulation_links, crawl_top_circulations, crawl_lost_objects
 from nthu_library.user import User as LibraryUser
-import nthu_library.static_urls as NTHULibraryUrl
+from nthu_library.crawler import crawl_rss, \
+    get_circulation_links, \
+    crawl_top_circulations, crawl_lost_objects
 
 __author__ = 'salas'
 
@@ -14,7 +14,6 @@ class NTHULibrary(object):
 
     def __repr__(self):
         return '%s@library object' % self.user.account
-
 
     def get_lost(self,
                  place='ALL', date_start='2015-02-10',
@@ -34,13 +33,8 @@ class NTHULibrary(object):
                      'en' for English; or 'zh' for Chinese
         :return: `RSS dict()`
         """
-        param = {
-            None: '',
-            'en': '?C=LCC',
-            'zh': '?C=CCL',
-        }
-        url = NTHULibraryUrl.rss_recent_books + param[lang]
-        return get_rss(url)
+        param = {'en': '?C=LCC', 'zh': '?C=CCL'}
+        return crawl_rss(param.get(lang, ''))
 
     def get_top_circulated_materials(
             self, year=None, type='loaned'):
@@ -63,11 +57,11 @@ class NTHULibrary(object):
     def get_info(self):
         return self.user.get_info()
 
-    def get_current_borrow(self, res):
-        return self.user.get_current_borrow(res)
+    def get_current_borrow(self):
+        return self.user.get_current_borrow()
 
-    def get_borrow_history(self, res):
-        return self.user.get_borrow_history(res)
+    def get_borrow_history(self):
+        return self.user.get_borrow_history()
 
     def get_current_reserve(self):
         pass
@@ -75,5 +69,5 @@ class NTHULibrary(object):
     def get_hold_reserve(self):
         pass
 
-    def get_reserve_history(self, res):
-        return self.user.get_reserve_history(res)
+    def get_reserve_history(self):
+        return self.user.get_reserve_history()
