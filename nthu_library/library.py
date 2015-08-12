@@ -1,21 +1,16 @@
 from nthu_library.tools import get_rss
 from nthu_library.crawler import get_circulation_links, crawl_top_circulations, crawl_lost_objects
 from nthu_library.user import User as LibraryUser
+import nthu_library.static_urls as NTHULibraryUrl
 
 __author__ = 'salas'
 
 
 class NTHULibrary(object):
 
-    home = 'http://webpac.lib.nthu.edu.tw/F/'
-    top_circulations = 'http://www.lib.nthu.edu.tw/guide/topcirculations/index.htm'
-    top_circulations_bc2007 = 'http://www.lib.nthu.edu.tw/guide/topcirculations/bc2007.htm'
-    rss_recent_books = 'http://webpac.lib.nthu.edu.tw:8080/nbr/reader/rbn_rss.jsp'
-    lost_found_url = 'http://adage.lib.nthu.edu.tw/find/search_it.php'
-
     def __init__(self, user):
         self.user = LibraryUser(self, user)
-        self._circulation_links = get_circulation_links(self)
+        self._circulation_links = get_circulation_links()
 
     def __repr__(self):
         return '%s@library object' % self.user.account
@@ -30,7 +25,7 @@ class NTHULibrary(object):
             'date_end': date_end, 'catalog': catagory,
             'keyword': keyword
         }
-        return crawl_lost_objects(self, data)
+        return crawl_lost_objects(data)
 
     def get_newest_books(self, lang=None):
         """
@@ -44,13 +39,13 @@ class NTHULibrary(object):
             'en': '?C=LCC',
             'zh': '?C=CCL',
         }
-        url = NTHULibrary.rss_recent_books + param[lang]
+        url = NTHULibraryUrl.rss_recent_books + param[lang]
         return get_rss(url)
 
     def get_top_circulated_materials(
             self, year=None, type='loaned'):
         """
-        fetch the top circulated materials in library
+        fetch the top circulated materials(借閱排行) in library
         :param year: 4-digit number
         :param type: 'loaned' or 'reserved'
         :return: `dict()` type data

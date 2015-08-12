@@ -1,17 +1,18 @@
 from urllib.parse import urljoin
 
+import nthu_library.static_urls as NTHULibraryUrl
 from nthu_library.tools import get_page, get_pages, build_soup, post_page
 
 __author__ = 'salas'
 
 
-def get_circulation_links(NTHULibrary):
+def get_circulation_links():
     return [
         ({'text': a.text, 'href': a.get('href')},
-         urljoin(NTHULibrary.top_circulations, a.get('href')))
+         urljoin(NTHULibraryUrl.top_circulations, a.get('href')))
         for resp in get_pages([
-            NTHULibrary.top_circulations,
-            NTHULibrary.top_circulations_bc2007])
+            NTHULibraryUrl.top_circulations,
+            NTHULibraryUrl.top_circulations_bc2007])
         for a in build_soup(resp).find(id='cwrp').find_all('a')
     ]
 
@@ -37,8 +38,8 @@ def crawl_top_circulations(query):
     return results
 
 
-def crawl_lost_objects(NTHULibrary, data):
-    soup = post_page(NTHULibrary.lost_found_url, data=data)
+def crawl_lost_objects(data):
+    soup = post_page(NTHULibraryUrl.lost_found_url, data=data)
     lost_items = list()
     for item in build_soup(soup).select('table > tr')[1:]:
         lost_items.append({

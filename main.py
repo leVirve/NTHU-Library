@@ -1,8 +1,8 @@
 import os
 import json
 
-from nthu_library import NTHULibrary, UserPayload, timeit
-
+from nthu_library import NTHULibrary, timeit
+from nthu_library.user import Account
 
 __author__ = 'salas'
 
@@ -35,8 +35,8 @@ def get_personal_info(lib):
     result = lib.get_info()
     info = {
         'personal': result,
-        '借閱歷史': lib.get_bowrrow_history(result),
-        '借閱中': lib.get_current_bowrrow(result),
+        '借閱歷史': lib.get_borrow_history(result),
+        '借閱中': lib.get_current_borrow(result),
         '預約紀錄': lib.get_reserve_history(result),
     }
     return info
@@ -71,8 +71,9 @@ funcs = eval('{%s}' % ''.join(function_doc.split()))
 if __name__ == '__main__':
 
     account, pwd = welcome()
-    library = NTHULibrary(UserPayload(account, pwd))
+    library = NTHULibrary(Account(account, pwd))
 
-    instr = input('What do you want to do > ').strip()
-
-    start(instr, library)
+    start('personal', library)
+    start('top', library)
+    start('new', library)
+    start('lost', library)

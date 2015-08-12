@@ -1,6 +1,7 @@
 import re
-
 from urllib.parse import urljoin
+
+import nthu_library.static_urls as NTHULibraryUrl
 from nthu_library.tools import get_page, post_page, get_rss
 
 __author__ = 'salas'
@@ -45,7 +46,7 @@ class User:
         self.is_login = self.init_account()
 
     def init_account(self):
-        self.account.home_url = self.parent.home
+        self.account.home_url = NTHULibraryUrl.info_system
         return self.account.login()
 
     def get_info(self):
