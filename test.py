@@ -2,7 +2,7 @@ import os
 import json
 
 from nthu_library import NTHULibrary, timeit
-from nthu_library.user import Account
+from nthu_library.user import Account, NotLoginException
 
 
 def get_newest_books(lib, **kwargs):
@@ -22,12 +22,16 @@ def get_top_circulations(lib, **kwargs):
 
 
 def get_personal_info(lib):
-    return {
-        'personal': lib.get_info(),
-        '借閱歷史': lib.get_borrow_history(),
-        '借閱中': lib.get_current_borrow(),
-        '預約紀錄': lib.get_reserve_history(),
-    }
+    try:
+        return {
+            'personal': lib.get_info(),
+            '借閱歷史': lib.get_borrow_history(),
+            '借閱中': lib.get_current_borrow(),
+            '預約紀錄': lib.get_reserve_history(),
+        }
+    except NotLoginException as e:
+        print('Exception: Not login yet')
+    return None
 
 
 def get_lost(lib):
