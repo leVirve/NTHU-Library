@@ -5,14 +5,6 @@ from nthu_library import NTHULibrary, timeit
 from nthu_library.user import Account
 
 
-function_doc = """
-    'personal': get_personal_info,
-    'new': get_newest_books,
-    'top': get_top_circulations,
-    'lost': get_lost,
-"""
-
-
 def get_newest_books(lib, **kwargs):
     """
         :param lang: default is `None` to get both languages,
@@ -52,6 +44,13 @@ def start(instr, lib):
     with open('my-library-data.json', 'w', encoding='utf8') as f:
         json.dump(results, f, indent=2, ensure_ascii=False, sort_keys=True)
 
+
+function_doc = """
+    'personal': get_personal_info,
+    'new': get_newest_books,
+    'top': get_top_circulations,
+    'lost': get_lost,
+"""
 
 ''' functions eval() from doc string '''
 funcs = eval('{%s}' % ''.join(function_doc.split()))
