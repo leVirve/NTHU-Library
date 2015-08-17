@@ -3,8 +3,6 @@ from nthu_library.crawler import crawl_rss, \
     get_circulation_links, \
     crawl_top_circulations, crawl_lost_objects
 
-__author__ = 'salas'
-
 
 class NTHULibrary(object):
 

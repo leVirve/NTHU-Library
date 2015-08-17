@@ -3,8 +3,6 @@ from nthu_library.crawler import login_action, \
     crawl_current_borrow, crawl_borrow_history, \
     crawl_personal_page, get_personal_details_table
 
-__author__ = 'salas'
-
 
 class NotLoginException(Exception):
     pass

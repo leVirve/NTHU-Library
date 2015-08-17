@@ -4,8 +4,6 @@ import json
 from nthu_library import NTHULibrary, timeit
 from nthu_library.user import Account
 
-__author__ = 'salas'
-
 
 function_doc = """
     'personal': get_personal_info,
