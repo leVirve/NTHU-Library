@@ -5,8 +5,6 @@ from urllib.parse import urljoin
 import nthu_library.static_urls as nthu_library_url
 from nthu_library.tools import get_page, get_pages, build_soup, post_page
 
-__author__ = 'salas'
-
 
 def get_circulation_links():
     return [
