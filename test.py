@@ -44,20 +44,15 @@ def get_lost(lib):
 
 @timeit
 def start(instr, lib):
-    results = funcs[instr](lib)
+    results = {
+        'personal': get_personal_info,
+        'new': get_newest_books,
+        'top': get_top_circulations,
+        'lost': get_lost,
+    }[instr](lib)
+
     with open('my-library-data.json', 'w', encoding='utf8') as f:
         json.dump(results, f, indent=2, ensure_ascii=False, sort_keys=True)
-
-
-function_doc = """
-    'personal': get_personal_info,
-    'new': get_newest_books,
-    'top': get_top_circulations,
-    'lost': get_lost,
-"""
-
-''' functions eval() from doc string '''
-funcs = eval('{%s}' % ''.join(function_doc.split()))
 
 
 if __name__ == '__main__':
@@ -66,6 +61,7 @@ if __name__ == '__main__':
     password = os.getenv('NTHU_LIBRARY_PWD') or input('PWD: ')
     library = NTHULibrary(Account(account, password))
 
+    # start testing crawler function
     start('personal', library)
     start('top', library)
     start('new', library)

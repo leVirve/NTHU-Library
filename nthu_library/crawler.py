@@ -6,6 +6,9 @@ import nthu_library.static_urls as nthu_library_url
 from nthu_library.tools import get_page, get_pages, build_soup, post_page
 
 
+get_cols = lambda row: [e for e in row.children if str(e).strip()]
+
+
 def get_circulation_links():
     return [
         ({'text': a.text, 'href': a.get('href')},
@@ -30,9 +33,9 @@ def crawl_top_circulations(query):
                 rk, title, cnt = row.findChildren()
             books.append({
                 'rank': rk.text,
-                'bookname': title.text.strip(' /'),
+                'book_name': title.text.strip(' /'),
                 'link': ref.get('href') if ref else None,
-                'times': cnt.text
+                'circulations': cnt.text
             })
         results[table.get('summary')] = books
     return results
@@ -72,17 +75,18 @@ def crawl_personal_page(session_url):
     # 圖書館流通狀態
     status = {}
     for row in tables[0].find_all('tr'):
-        cols = [e for e in row.children if str(e).strip()]
+        cols = get_cols(row)
         key = cols[0].text.strip()
-        val = cols[1].find('a').text.strip()
-        link = re.findall("'(.*?)'", cols[1].find('a').attrs.get('href'))[0]
-        resource_links[key] = link
+        a_tag = cols[1].find('a')
+        val = a_tag.text.strip()
+        link = re.findall("'(.*?)'", a_tag.get('href'))[0]
         status[key] = val
+        resource_links[key] = link
 
     # 聯絡資料
     person = {}
     for row in tables[1].find_all('tr'):
-        cols = [e for e in row.children if str(e).strip()]
+        cols = get_cols(row)
         key = cols[0].text.strip() or '地址'
         val = cols[1].text.strip()
         person[key] = person[key] + val if key in person else val
@@ -90,7 +94,7 @@ def crawl_personal_page(session_url):
     # 管理資訊
     manage = {}
     for row in tables[2].find_all('tr'):
-        cols = [e for e in row.children if str(e).strip()]
+        cols = get_cols(row)
         key = cols[0].text.strip()
         val = cols[1].text.strip()
         if key == '讀者權限資料':
@@ -113,8 +117,8 @@ def get_personal_details_table(url):
 def crawl_user_reserve_history(rows):
     books = []
     for row in rows:
-        cols = [e for e in row.children if str(e).strip()]
-        book = {
+        cols = get_cols(row)
+        books.append({
             'link': cols[0].find('a').attrs.get('href'),
             'author': cols[1].text,
             'title': cols[2].text.strip(' /'),
@@ -127,48 +131,54 @@ def crawl_user_reserve_history(rows):
             'call_number': cols[9].text,
             'branch_take': cols[10].text,
             'book_status': cols[11].text
-        }
-        books.append(book)
+        })
     return books
 
 
 def crawl_current_borrow(rows):
     books = []
     for row in rows:
-        cols = [e for e in row.children if str(e).strip()]
-        meta_dl = re.findall('(.*?)(\d+)', cols[5].text)[0]
-
-        book = {
-            'link': cols[0].find('a').attrs.get('href'),
-            'author': cols[2].text,
-            'title': cols[3].text.strip(' /'),
-            'publish_year': cols[4].text,
-            'deadline_status': meta_dl[0] if len(meta_dl) == 2 else None,
-            'deadline': meta_dl[1] if len(meta_dl) == 2 else meta_dl[0],
-            'publish_cost': cols[7].text,
-            'branch': cols[8].text,
-            'call_number': cols[9].text
-        }
-        books.append(book)
+        cols = get_cols(row)
+        meta_deadline = re.findall('(.*?)(\d+)', cols[5].text)[0]
+        try:
+            status, date = meta_deadline
+        except ValueError:
+            date = meta_deadline
+        finally:
+            books.append({
+                'link': cols[0].find('a').attrs.get('href'),
+                'author': cols[2].text,
+                'title': cols[3].text.strip(' /'),
+                'publish_year': cols[4].text,
+                'deadline_status': status,
+                'deadline': date,
+                'publish_cost': cols[7].text,
+                'branch': cols[8].text,
+                'call_number': cols[9].text
+            })
     return books
 
 
 def crawl_borrow_history(rows):
     books = []
     for row in rows:
-        cols = [e for e in row.children if str(e).strip()]
-        meta_dl = re.findall('(.*?)(\d+)', cols[4].text)[0]
-        book = {
-            'link': cols[0].find('a').attrs.get('href'),
-            'author': cols[1].text,
-            'title': cols[2].text.strip(' /'),
-            'publish_year': cols[3].text,
-            'deadline_status': meta_dl[0] if len(meta_dl) == 2 else None,
-            'deadline': meta_dl[1] if len(meta_dl) == 2 else meta_dl[0],
-            'borrow_time': cols[6].text + ' ' + re.findall('>(.*?)<', str(cols[7]))[0],
-            'branch': cols[8].text
-        }
-        books.append(book)
+        cols = get_cols(row)
+        meta_deadline = re.findall('(.*?)(\d+)', cols[4].text)[0]
+        try:
+            status, date = meta_deadline
+        except ValueError:
+            date = meta_deadline
+        finally:
+            books.append({
+                'link': cols[0].find('a').attrs.get('href'),
+                'author': cols[1].text,
+                'title': cols[2].text.strip(' /'),
+                'publish_year': cols[3].text,
+                'deadline_status': status,
+                'deadline': date,
+                'borrow_time': cols[6].text + ' ' + re.findall('>(.*?)<', str(cols[7]))[0],
+                'branch': cols[8].text
+            })
     return books
 
 

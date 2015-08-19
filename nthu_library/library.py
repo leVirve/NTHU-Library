@@ -46,7 +46,7 @@ class NTHULibrary(object):
         query = [
             href
             for a, href in self._circulation_links
-            if not year or (year and str(year)) in a.get('text')
+            if not year or str(year) in a.get('text')
             if a.get('href').startswith(q_type)
         ]
         return crawl_top_circulations(query)
